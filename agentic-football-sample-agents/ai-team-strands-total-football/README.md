@@ -148,7 +148,7 @@ For AWS deployment, install the prerequisites documented by the supplied teams:
 AgentCore CLI **0.25.0+**, AWS CLI, Node.js, npm, CDK and uv; configure credentials
 and enable Bedrock model access. Each agent's `pyproject.toml` declares its runtime
 dependencies. The existing CDK scaffold is reused under a distinct project name,
-`TeamStrandsTotalFootball`, with empty deployment targets until configured.
+`TeamTotalFootball`, with empty deployment targets until configured.
 
 ```powershell
 $env:AWS_DEFAULT_REGION = "us-east-1"

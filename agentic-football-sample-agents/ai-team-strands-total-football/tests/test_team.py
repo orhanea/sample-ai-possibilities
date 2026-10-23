@@ -363,7 +363,7 @@ class PackagingTests(unittest.TestCase):
     def test_five_runtimes_and_resolvable_bootstrap_paths(self):
         spec = json.loads((ROOT / "agentcore" / "agentcore.json").read_text(encoding="utf-8"))
         self.assertEqual(len(spec["runtimes"]), 5)
-        self.assertEqual(spec["name"], "TeamStrandsTotalFootball")
+        self.assertEqual(spec["name"], "TeamTotalFootball")
         for runtime in spec["runtimes"]:
             entrypoint = ROOT / runtime["codeLocation"] / runtime["entrypoint"]
             self.assertTrue(entrypoint.is_file())

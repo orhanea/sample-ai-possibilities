@@ -1,0 +1,60 @@
+{
+  "region": "us-east-1",
+  "account": "142379879311",
+  "model": "us.amazon.nova-lite-v1:0",
+  "executionRoleArn": "arn:aws:iam::142379879311:role/team-SolutionAccessRole-2wtI58DDXtIj",
+  "agents": [
+    {
+      "playerId": 0,
+      "name": "Victor_Valdes",
+      "identity": "V\u00edctor Vald\u00e9s",
+      "harnessId": "Victor_Valdes-s9Hb8cmQZf",
+      "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Victor_Valdes-s9Hb8cmQZf",
+      "status": "READY",
+      "displayName": "V\u00edctor Vald\u00e9s",
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_gk_agent-70vemDQllB",
+      "model": "us.amazon.nova-pro-v1:0",
+      "harnessVersion": "6"
+    },
+    {
+      "playerId": 1,
+      "name": "Franz_Beckenbauer",
+      "identity": "Franz Beckenbauer",
+      "harnessId": "Franz_Beckenbauer-7JmZaRkgoy",
+      "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Franz_Beckenbauer-7JmZaRkgoy",
+      "status": "READY",
+      "displayName": "Franz Beckenbauer",
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_def_agent-GSceZ9PS3o"
+    },
+    {
+      "playerId": 2,
+      "name": "Lothar_Matthaus",
+      "identity": "Lothar Matth\u00e4us",
+      "harnessId": "Lothar_Matthaus-aSCAcyPCGi",
+      "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Lothar_Matthaus-aSCAcyPCGi",
+      "status": "READY",
+      "displayName": "Lothar Matth\u00e4us",
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_mid_agent-61imcr5a3C"
+    },
+    {
+      "playerId": 3,
+      "name": "Johan_Cruyff",
+      "identity": "Johan Cruyff",
+      "harnessId": "Johan_Cruyff-WUCkA7ts21",
+      "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Johan_Cruyff-WUCkA7ts21",
+      "status": "READY",
+      "displayName": "Johan Cruyff",
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_fwd1_agent-vVHTWsE0ty"
+    },
+    {
+      "playerId": 4,
+      "name": "Eusebio",
+      "identity": "Eus\u00e9bio",
+      "harnessId": "Eusebio-5Y0imdI3RR",
+      "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Eusebio-5Y0imdI3RR",
+      "status": "READY",
+      "displayName": "Eus\u00e9bio",
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_fwd2_agent-vYVMe3rby4"
+    }
+  ]
+}

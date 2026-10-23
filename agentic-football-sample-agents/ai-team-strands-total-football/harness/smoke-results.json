@@ -1,0 +1,364 @@
+[
+  {
+    "name": "ai_gk_agent",
+    "playerId": 0,
+    "teamId": 0,
+    "sessionState": "cold",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2313,
+        "outputTokens": 43,
+        "totalTokens": 2356
+      },
+      "metrics": {
+        "latencyMs": 782
+      }
+    },
+    "latencySeconds": 27.161,
+    "raw": "[{\"commandType\":\"GK_DISTRIBUTE\",\"playerId\":0,\"teamId\":0,\"parameters\":{\"target_player_id\":1,\"method\":\"KICK\"},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "GK_DISTRIBUTE",
+      "playerId": 0,
+      "teamId": 0,
+      "parameters": {
+        "target_player_id": 1,
+        "method": "KICK"
+      },
+      "duration": 0
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_gk_agent",
+    "playerId": 0,
+    "teamId": 1,
+    "sessionState": "warm",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2770,
+        "outputTokens": 32,
+        "totalTokens": 2802
+      },
+      "metrics": {
+        "latencyMs": 629
+      }
+    },
+    "latencySeconds": 1.157,
+    "raw": "[{\"commandType\":\"SET_STANCE\",\"playerId\":0,\"teamId\":1,\"parameters\":{\"stance\":2},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "SET_STANCE",
+      "playerId": 0,
+      "teamId": 1,
+      "parameters": {
+        "stance": 2
+      },
+      "duration": 0
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_mid_agent",
+    "playerId": 2,
+    "teamId": 0,
+    "sessionState": "cold",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2314,
+        "outputTokens": 36,
+        "totalTokens": 2350
+      },
+      "metrics": {
+        "latencyMs": 667
+      }
+    },
+    "latencySeconds": 27.155,
+    "raw": "[{\"commandType\":\"PASS\",\"playerId\":2,\"teamId\":0,\"parameters\":{\"target_player_id\":1,\"type\":\"GROUND\"},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "PASS",
+      "playerId": 2,
+      "teamId": 0,
+      "parameters": {
+        "target_player_id": 1,
+        "type": "GROUND"
+      },
+      "duration": 0
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_mid_agent",
+    "playerId": 2,
+    "teamId": 1,
+    "sessionState": "warm",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2764,
+        "outputTokens": 32,
+        "totalTokens": 2796
+      },
+      "metrics": {
+        "latencyMs": 644
+      }
+    },
+    "latencySeconds": 1.242,
+    "raw": "[{\"commandType\":\"PRESS_BALL\",\"playerId\":2,\"teamId\":1,\"parameters\":{\"intensity\":0.8},\"duration\":1}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "PRESS_BALL",
+      "playerId": 2,
+      "teamId": 1,
+      "parameters": {
+        "intensity": 0.8
+      },
+      "duration": 1
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_def_agent",
+    "playerId": 1,
+    "teamId": 0,
+    "sessionState": "cold",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2313,
+        "outputTokens": 43,
+        "totalTokens": 2356
+      },
+      "metrics": {
+        "latencyMs": 615
+      }
+    },
+    "latencySeconds": 33.037,
+    "raw": "[{\"commandType\":\"MOVE_TO\",\"playerId\":1,\"teamId\":0,\"parameters\":{\"target_x\":0,\"target_y\":0,\"sprint\":false},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "MOVE_TO",
+      "playerId": 1,
+      "teamId": 0,
+      "parameters": {
+        "target_x": 0,
+        "target_y": 0,
+        "sprint": false
+      },
+      "duration": 0
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_def_agent",
+    "playerId": 1,
+    "teamId": 1,
+    "sessionState": "warm",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2770,
+        "outputTokens": 43,
+        "totalTokens": 2813
+      },
+      "metrics": {
+        "latencyMs": 884
+      }
+    },
+    "latencySeconds": 1.637,
+    "raw": "[{\"commandType\":\"MOVE_TO\",\"playerId\":1,\"teamId\":1,\"parameters\":{\"target_x\":0,\"target_y\":0,\"sprint\":false},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "MOVE_TO",
+      "playerId": 1,
+      "teamId": 1,
+      "parameters": {
+        "target_x": 0,
+        "target_y": 0,
+        "sprint": false
+      },
+      "duration": 0
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_fwd2_agent",
+    "playerId": 4,
+    "teamId": 0,
+    "sessionState": "cold",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2316,
+        "outputTokens": 36,
+        "totalTokens": 2352
+      },
+      "metrics": {
+        "latencyMs": 672
+      }
+    },
+    "latencySeconds": 33.446,
+    "raw": "[{\"commandType\":\"SHOOT\",\"playerId\":4,\"teamId\":0,\"parameters\":{\"aim_location\":\"BL\",\"power\":1},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "SHOOT",
+      "playerId": 4,
+      "teamId": 0,
+      "parameters": {
+        "aim_location": "BL",
+        "power": 1
+      },
+      "duration": 0
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_fwd2_agent",
+    "playerId": 4,
+    "teamId": 1,
+    "sessionState": "warm",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2766,
+        "outputTokens": 44,
+        "totalTokens": 2810
+      },
+      "metrics": {
+        "latencyMs": 714
+      }
+    },
+    "latencySeconds": 1.347,
+    "raw": "[{\"commandType\":\"MOVE_TO\",\"playerId\":4,\"teamId\":1,\"parameters\":{\"target_x\":-18,\"target_y\":0,\"sprint\":false},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "MOVE_TO",
+      "playerId": 4,
+      "teamId": 1,
+      "parameters": {
+        "target_x": -18,
+        "target_y": 0,
+        "sprint": false
+      },
+      "duration": 0
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_fwd1_agent",
+    "playerId": 3,
+    "teamId": 0,
+    "sessionState": "cold",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2315,
+        "outputTokens": 36,
+        "totalTokens": 2351
+      },
+      "metrics": {
+        "latencyMs": 590
+      }
+    },
+    "latencySeconds": 37.17,
+    "raw": "[{\"commandType\":\"PASS\",\"playerId\":3,\"teamId\":0,\"parameters\":{\"target_player_id\":4,\"type\":\"GROUND\"},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "PASS",
+      "playerId": 3,
+      "teamId": 0,
+      "parameters": {
+        "target_player_id": 4,
+        "type": "GROUND"
+      },
+      "duration": 0
+    },
+    "passed": true
+  },
+  {
+    "name": "ai_fwd1_agent",
+    "playerId": 3,
+    "teamId": 1,
+    "sessionState": "warm",
+    "metadata": {
+      "usage": {
+        "inputTokens": 2766,
+        "outputTokens": 44,
+        "totalTokens": 2810
+      },
+      "metrics": {
+        "latencyMs": 691
+      }
+    },
+    "latencySeconds": 1.223,
+    "raw": "[{\"commandType\":\"MOVE_TO\",\"playerId\":3,\"teamId\":1,\"parameters\":{\"target_x\":-4,\"target_y\":15,\"sprint\":false},\"duration\":0}]",
+    "events": [
+      {
+        "messageStop": {
+          "stopReason": "end_turn"
+        }
+      }
+    ],
+    "command": {
+      "commandType": "MOVE_TO",
+      "playerId": 3,
+      "teamId": 1,
+      "parameters": {
+        "target_x": -4,
+        "target_y": 15,
+        "sprint": false
+      },
+      "duration": 0
+    },
+    "passed": true
+  }
+]
