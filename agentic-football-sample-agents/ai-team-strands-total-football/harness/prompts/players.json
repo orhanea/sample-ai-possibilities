@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "players": [
+    {
+      "player_id": 0,
+      "name": "Victor_Valdes",
+      "role": "goalkeeper",
+      "own_end_example_target": null
+    },
+    {
+      "player_id": 1,
+      "name": "Franz_Beckenbauer",
+      "role": "balanced_defender",
+      "own_end_example_target": 2
+    },
+    {
+      "player_id": 2,
+      "name": "Lothar_Matthaus",
+      "role": "connector",
+      "own_end_example_target": null
+    },
+    {
+      "player_id": 3,
+      "name": "Johan_Cruyff",
+      "role": "link",
+      "own_end_example_target": 4
+    },
+    {
+      "player_id": 4,
+      "name": "Eusebio",
+      "role": "finisher",
+      "own_end_example_target": null
+    }
+  ]
+}

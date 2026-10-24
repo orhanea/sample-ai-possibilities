@@ -1,20 +1,22 @@
 {
   "region": "us-east-1",
   "account": "142379879311",
-  "model": "us.amazon.nova-lite-v1:0",
+  "model": "us.anthropic.claude-sonnet-4-6",
   "executionRoleArn": "arn:aws:iam::142379879311:role/team-SolutionAccessRole-2wtI58DDXtIj",
   "agents": [
     {
       "playerId": 0,
       "name": "Victor_Valdes",
-      "identity": "V\u00edctor Vald\u00e9s",
+      "identity": "Víctor Valdés",
       "harnessId": "Victor_Valdes-s9Hb8cmQZf",
       "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Victor_Valdes-s9Hb8cmQZf",
       "status": "READY",
-      "displayName": "V\u00edctor Vald\u00e9s",
+      "displayName": "Víctor Valdés",
       "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_gk_agent-70vemDQllB",
-      "model": "us.amazon.nova-pro-v1:0",
-      "harnessVersion": "6"
+      "model": "us.anthropic.claude-sonnet-4-6",
+      "harnessVersion": "11",
+      "promptFile": "Victor_Valdes.txt",
+      "promptSha256": "7186976330dd3a148072e2040a73d928ee4e16c56409dac93fb3a673710a238c"
     },
     {
       "playerId": 1,
@@ -24,17 +26,25 @@
       "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Franz_Beckenbauer-7JmZaRkgoy",
       "status": "READY",
       "displayName": "Franz Beckenbauer",
-      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_def_agent-GSceZ9PS3o"
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_def_agent-GSceZ9PS3o",
+      "harnessVersion": "13",
+      "model": "us.anthropic.claude-sonnet-4-6",
+      "promptFile": "Franz_Beckenbauer.txt",
+      "promptSha256": "f3e55777d22b361f28b05847c853829d319d77c8752460d2a1eb3c5d3ef766ce"
     },
     {
       "playerId": 2,
       "name": "Lothar_Matthaus",
-      "identity": "Lothar Matth\u00e4us",
+      "identity": "Lothar Matthäus",
       "harnessId": "Lothar_Matthaus-aSCAcyPCGi",
       "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Lothar_Matthaus-aSCAcyPCGi",
       "status": "READY",
-      "displayName": "Lothar Matth\u00e4us",
-      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_mid_agent-61imcr5a3C"
+      "displayName": "Lothar Matthäus",
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_mid_agent-61imcr5a3C",
+      "harnessVersion": "11",
+      "model": "us.anthropic.claude-sonnet-4-6",
+      "promptFile": "Lothar_Matthaus.txt",
+      "promptSha256": "a59fe76a7e9772d911a6264269d5182f74088cfb8b80cf90a8b04b55ed96e100"
     },
     {
       "playerId": 3,
@@ -44,17 +54,31 @@
       "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Johan_Cruyff-WUCkA7ts21",
       "status": "READY",
       "displayName": "Johan Cruyff",
-      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_fwd1_agent-vVHTWsE0ty"
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_fwd1_agent-vVHTWsE0ty",
+      "harnessVersion": "11",
+      "model": "us.anthropic.claude-sonnet-4-6",
+      "promptFile": "Johan_Cruyff.txt",
+      "promptSha256": "ecce64173f5cc3e74830d5434669ec47bd338d1d47a2716019ac4977d387f01d"
     },
     {
       "playerId": 4,
       "name": "Eusebio",
-      "identity": "Eus\u00e9bio",
+      "identity": "Eusébio",
       "harnessId": "Eusebio-5Y0imdI3RR",
       "harnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/Eusebio-5Y0imdI3RR",
       "status": "READY",
-      "displayName": "Eus\u00e9bio",
-      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_fwd2_agent-vYVMe3rby4"
+      "displayName": "Eusébio",
+      "originalHarnessArn": "arn:aws:bedrock-agentcore:us-east-1:142379879311:harness/ai_fwd2_agent-vYVMe3rby4",
+      "harnessVersion": "9",
+      "model": "us.anthropic.claude-sonnet-4-6",
+      "promptFile": "Eusebio.txt",
+      "promptSha256": "a995f043f6ed7422afbd29fc948babdb3093f1d502d30b98349e461464e2c9bb"
     }
-  ]
+  ],
+  "strategyRevision": "opponent-goal-direction-2026-10-24",
+  "promptVerification": {
+    "date": "2026-10-24",
+    "source": "AWS GetHarness read-only",
+    "allMatchLocalFiles": true
+  }
 }

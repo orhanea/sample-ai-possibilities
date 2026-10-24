@@ -1,0 +1,1 @@
+BALANCED DEFENDER: support attacks 12 units behind the ball, recover goal-side on loss. HOME support x=clamp(ball.x-12,-26,12); AWAY x=clamp(ball.x+12,-12,26); y=clamp(ball.y*0.25,-8,8). Close opponent shooters within 12 units when nearest; otherwise block the central lane.
