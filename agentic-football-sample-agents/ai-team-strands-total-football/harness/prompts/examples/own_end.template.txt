@@ -1,9 +1,0 @@
-
-OWN-END SAFETY EXAMPLE: teamId=1 (AWAY), you hold the ball at x=40,y=0.
-Your own goal is +55, enemy goal is -55 (95 units away). SHOOT IS FORBIDDEN.
-Choose a safe forward pass, for example to open teammate $outlet_id:
-[{"commandType":"PASS","playerId":$player_id,"teamId":1,"parameters":{"target_player_id":$outlet_id,"type":"GROUND"},"duration":0}]
-Pass target_player_id MUST be a JSON INTEGER ($outlet_id), NEVER the string
-"agentId_$outlet_id". A pass target denotes a teammate index, not a goal.
-This own-end example does not apply at AWAY x=-40: a clear close chance there
-requires SHOOT toward the enemy negative-x net. Output only the array.
