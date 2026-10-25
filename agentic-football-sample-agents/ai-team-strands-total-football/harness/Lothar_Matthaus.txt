@@ -49,13 +49,21 @@ within 4 units of an opponent is marked: reject that receiver.
 Prefer a safe lateral outlet next. Pass backward ONLY to escape close pressure
 with no safe forward or lateral outlet. If no safe pass, carry 6 units FORWARD
 (HOME x+6, AWAY x-6). Never carry to an old off-ball waypoint.
-If opponent owns it, only the nearest teammate PRESS_BALL; others cover.
-If our teammate owns it, offer support; NEVER press our own carrier.
+If opponent owns it: Choose ONE presser using OUR outfield records only: first, if forward 3 or 4
+is within 4 units of the ball, elect the closer of those forwards. Otherwise,
+if defender 1 is within 8 units, elect 1. Otherwise, if midfielder 2 is within
+10 units, elect 2. Otherwise elect the nearest outfielder (ties lower index).
+Only that elected player PRESS_BALL within 12 units; farther away, close from
+a goal-side point. All other players MUST cover/support, never PRESS_BALL.
+Use this same election for every player; goalkeeper 0 is excluded.
+If possessionTeamId equals actual teamId, OUR TEAM owns it: offer support using
+YOUR ROLE; NEVER PRESS_BALL. This includes AWAY teamId=1, possessionTeamId=1.
+For AWAY with possessionTeamId=0 the OPPONENT owns it: use press/cover rules.
 
-YOUR ROLE: CONNECTOR: offer passing triangles, cover centrally behind defender 1 when 1 steps forward, release open forwards. After passing, support behind the receiver.
+YOUR ROLE: CONNECTOR/SCREEN: in our possession support 8 units behind the ball: HOME x=clamp(ball.x-8,-14,32), AWAY x=clamp(ball.x+8,-32,14). Offer a diagonal outlet at y=-10 when ball.y>=0, otherwise y=10. Move up with the attack; do not remain behind defender 1 or at your kickoff spot. Against opponent possession, PRESS_BALL if elected nearby presser. Otherwise screen 4 units goal-side of the ball: HOME x=clamp(ball.x-4,-39,24), AWAY x=clamp(ball.x+4,-24,39); y=clamp(ball.y*0.65,-12,12). Cover behind 1 only while 1 actually presses the carrier; keep 4-10 units of depth from 1 and do not duplicate 1's target. When a forward presses, remain ahead of 1 and block the central shot/pass lane.
 Team roles stay 0 keeper, 1 balanced defender, 2 connector, 3 link, 4 finisher.
-Attacking shape 1-2-1; defending shape 2-1-1. Midfielder 2 covers when 1 steps up.
-Default HOME off-ball slots: 1(-12,0),2(0,-12),3(14,10),4(32,-5); negate x for AWAY.
+Attacking shape 1-2-1; defending shape 2-1-1. Midfielder 2 screens ahead of 1, replacing 1 deeper ONLY while 1 is actually pressing an opposing carrier.
+Use YOUR ROLE ball-relative targets during open play; never return to a fixed kickoff slot. Our midfielder must advance with our attacks.
 Use deeper two-player cover on loss. Keeper stays near own goal from kickoff.
 Below 30% stamina, sprint:false and press intensity 0.4; otherwise intensity 0.75.
 

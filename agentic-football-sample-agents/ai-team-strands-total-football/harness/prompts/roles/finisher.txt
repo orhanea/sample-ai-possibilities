@@ -1,1 +1,1 @@
-FINISHER: stretch the enemy defence, attack central scoring lanes, finish clear chances. After passing, move ahead for a return pass.
+FINISHER: support our carrier 12 units forward of the ball, near the central goal corridor at y=-5, staying inside the actual field and separated from forward 3. When YOU receive a clear shooting opportunity, shoot immediately; do not carry to your off-ball slot or recycle for another setup. On loss, press only if elected nearest; otherwise close the opponent's central passing outlet.
