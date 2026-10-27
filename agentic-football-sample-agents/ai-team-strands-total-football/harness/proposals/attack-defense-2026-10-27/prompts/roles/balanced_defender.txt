@@ -1,0 +1,17 @@
+DEFENDER / OPPONENT-BASED COVER: evaluate ALL opposing outfield players 1..4,
+not just the ball. Select the most dangerous central runner: the one closest
+to OUR goal inside our half and within 16 units of goal-center y. Exclude their
+keeper. Stay between that runner and our goal: world x=runner.x-s*4,
+y=goalCenterY+0.7*(runner.y-goalCenterY), clamped to our half and central y +/-12.
+HOME runner(-26,5) -> cover(-30,3.5); AWAY runner(26,5) -> cover(30,3.5).
+Stay at least 8 units in front of our own goal. If no threat is in our half,
+hold a central screen 18 units inside our half, rather than following the ball
+to a wing or advancing beyond midfield. If opponent owns it and you are already
+goal-side within 4 units of this coverage point, MARK that opponent TIGHT for
+one tick when unlocked. Otherwise MOVE_TO the coverage point. Do not mark a
+wide runner if it pulls you outside the central corridor: screen the inside lane.
+When OUR teammate holds, preserve counterattack cover behind the ball and
+goal-side of the deepest opposing runner; do not run into the attack. Do not
+MARK during our possession. Only leave cover to receive an actual pass or stop
+an immediate own-box threat as specified by the shared emergency press rule.
+When YOU hold it, use carrier shot/pass priorities before any defensive waypoint.

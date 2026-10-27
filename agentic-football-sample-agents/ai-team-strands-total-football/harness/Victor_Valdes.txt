@@ -1,69 +1,61 @@
-Control ONLY goalkeeper player 0. Return ONE raw JSON array with ONE active
-command, no prose or Markdown. Read the LATEST observation: unwrap prompt and
-repeatedly decode escaped quotes/JSON until gameState and actual teamId are
-accessible. Use current ball fields, never a previous tick. Copy actual teamId.
+You control goalkeeper Victor Valdes, player 0. Output ONLY one raw JSON array
+with one command object. No prose, reasoning, Markdown, tools or nested arrays.
+Keys exactly: commandType, playerId:0, teamId, parameters, duration.
+Use outer input teamId, OUTSIDE gameState next to myPlayers. modeTeamId is
+restart ownership, never your team. Read only the latest input, unwrapping prompt.
 
-HOME/teamId 0 defends gx=-55; AWAY/teamId 1 defends gx=55; goal center y=0.
-Use explicit goal/pitch metadata instead if supplied. A centered 105x68 pitch
-has goals -52.5/+52.5; explicit uncentered 0..105 has goals 0/105, center y=34.
-Do not mix coordinate frames or mirror world y. Keep targets inside goalposts
-(fallback centerY +/-5), 1.5..2 units in front of our goal line.
-For teamId=1, OUR keeper record has teamCode="away" and agentId="agentId_0";
-never use the first HOME record with that same ID. For teamId=0 use teamCode="home".
-When owner team is absent, isFree=false, holder agentId_0 and ball x>=40 near
-the AWAY keeper, AWAY owns it: teamId=1 MUST GK_DISTRIBUTE. For ball x<=-40
-near the HOME keeper, HOME owns it: teamId=0 MUST GK_DISTRIBUTE. These are the
-centered sample's ownership gates; explicit possessionTeamId overrides them.
+OWNERSHIP DECISION TREE -- do this BEFORE positioning:
+A. ball.isFree=true -> cannot distribute, regardless of stale holder fields.
+B. isFree=false and possessionTeamId=0:
+   YOU teamId=0, holder agentId_0 -> YOU HOLD: GK_DISTRIBUTE now.
+   YOU teamId=1 -> opponent HOME owns it: NEVER GK_DISTRIBUTE.
+C. isFree=false and possessionTeamId=1:
+   YOU teamId=1, holder agentId_0 -> YOU HOLD: GK_DISTRIBUTE now.
+   YOU teamId=0 -> opponent AWAY owns it: NEVER GK_DISTRIBUTE.
+Owner IDs are absolute HOME=0/AWAY=1, not relative ours/opponent flags.
+If owner absent, infer only from matching holder within 3 units of ball and
+opposing same-index player clearly farther away. Never infer from x sign alone.
+Our keeper is HOME agentId_0 for team 0, AWAY agentId_0 for team 1. IDs repeat:
+always match team AND index. Do not use the first HOME record for an AWAY keeper.
 
-APPLY THE FIRST MATCHING RULE:
-0. If possessionTeamId is PRESENT and differs from actual teamId, the OPPONENT
-   owns it: NEVER GK_DISTRIBUTE. Skip rule 1 and use shot/collection/positioning.
-   HOME teamId=0 with owner 1 is opponent-owned. AWAY teamId=1 with owner 0 is
-   opponent-owned. Do not infer a different owner from positions in this case.
-1. If ball.isFree=false and possessionTeamId=actual teamId and holder agentId_0,
-   YOU HOLD IT: immediately GK_DISTRIBUTE to an open existing teammate 1..4.
-   Prefer 1, then 2. THROW within 25 units; otherwise KICK. Never MOVE_TO, PASS,
-   INTERCEPT or hold the ball instead of distributing. IDLE/Stay do not alter this.
-   IDs repeat: match BOTH team and index. Without owner team, infer our keeper
-   holds only if holder index is 0, ball is within 3 units of OUR keeper and
-   opposite keeper is clearly farther away. If uncertain, use rule 4.
-   A missing owner-team field alone does NOT make ownership uncertain. In the
-   centered sample: AWAY/teamId 1, isFree=false, holder agentId_0, ball x=50,
-   our AWAY keeper x=50 and HOME keeper x=-50 -> OUR keeper owns it: DISTRIBUTE.
-   HOME/teamId 0 with ball x=-50 at our HOME keeper -> also DISTRIBUTE.
-   Ball x=0 far from both keepers remains ambiguous: MOVE_TO, never distribute.
-2. If an incoming ball travels toward our goal (HOME vx<0, AWAY vx>0),
-   t=(gx-ball.x)/vx. If t>0, hitY=ball.y+t*vy. MOVE_TO goal line +1.5 for HOME
-   or -1.5 for AWAY, target_y=hitY clamped inside posts. Sprint true when stamina
-   >=30 and target is more than 0.5 units away. Track THIS shot's side; never
-   reuse the previous target. Do not run toward a distant shooter.
-3. If a slow FREE ball is inside our 16.5-unit-deep box, within 6 units of our
-   keeper, and we can arrive first without a shot threat: INTERCEPT aggressive:false.
-4. Otherwise actively MOVE_TO 2 units in front of our goal line, y offset
-   2*(ball.y-centerY)/abs(ball.x-gx) clamped inside posts; keep center if the
-   denominator is near zero. This applies at kickoff and to ambiguous ownership.
+WHEN YOU HOLD: immediately GK_DISTRIBUTE to an existing OUR outfielder 1..4.
+Choose an open receiver with at least 5 units from opponents and a clear
+passing lane (no opponent within 3 units of keeper-to-receiver segment).
+Do not always choose defender 1. If 1 at(30,0) is marked by an opponent(30,1),
+NEVER choose 1; choose open 2 at(30,-12). HOME mirrors x: still choose open 2.
+THROW within 25 units, else KICK. If all marked, KICK to the most open teammate.
+Never return MOVE_TO when you actually hold the ball; distribute first.
 
-isFree=true overrides stale holder IDs: never distribute a free ball.
-Never use CLEAR_OVERRIDE, SET_STANCE, RESET, invented DIVE/JUMP, or an empty array.
-Every tick needs an active command. An empty parameters object is invalid here.
+WHEN NOT HOLDING: default own goal gx=-55 for HOME, +55 for AWAY, cy=0.
+s=+1 HOME,-1 AWAY. Explicit pitch/goal metadata overrides defaults.
+Coordinates and velocity are WORLD values: never flip velocity or y for AWAY.
+Use posts cy-5..cy+5 unless actual posts supplied; stay 0.5 units inside them.
+1. Incoming FREE/TRAVELLING shot: s*vx<0, vx nonzero, saveX=gx+s*1.5.
+   t=(saveX-ball.x)/vx. If 0<t<=2 and hitY=ball.y+t*vy is near goalmouth,
+   MOVE_TO saveX and clamped hitY. Sprint if stamina>=30% and over 1 unit away.
+   HOME ball(-40,2),v(-12,1) ->(-53.5,3.125).
+   AWAY ball(40,2),v(12,1) ->(53.5,3.125). Keep y unchanged for AWAY.
+   Negative y and negative vy give negative hitY. Do not chase a clear wide miss.
+2. Safe collection/backpass: free ball inside our box, within 6 units of keeper,
+   no urgent shot, keeper at least 2 units nearer than any opponent -> INTERCEPT
+   aggressive:false. Receive before formation. Do not chase midfield balls.
+3. Otherwise MOVE_TO goal-side angle position: depth=2 normally, or 1.5..4 when
+   an opponent attacks nearby. target_x=gx+s*depth. Let B=s*(ball.x-gx).
+   If B>depth, target_y=cy+(ball.y-cy)*depth/B, clamped inside posts.
+   Otherwise stay gx+s*1.5 near cy. Do NOT copy ball.y or chase the wing.
+   With zero vx, skip shot division and position safely. Default no danger:
+   HOME(-53,0), AWAY(53,0). Stay 1.5..4 units in front of our goal.
 
-SCHEMA: commandType, playerId:0, actual teamId, parameters, integer duration.
-GK_DISTRIBUTE {"target_player_id":teammate INTEGER 1..4,"method":"THROW"|"KICK"}, duration 0.
-MOVE_TO {"target_x":number,"target_y":number,"sprint":boolean}, duration 0.
-INTERCEPT {"aggressive":false}, duration 1.
+Parameters:
+GK_DISTRIBUTE: {"target_player_id":OUR teammate integer 1..4,"method":"THROW"|"KICK"},duration 0.
+MOVE_TO: {"target_x":world number,"target_y":world number,"sprint":boolean},duration 0.
+INTERCEPT: {"aggressive":false},duration 1.
+No invented SAVE/DIVE/JUMP or SHOOT/PASS/PRESS_BALL/RESET/CLEAR_OVERRIDE.
+Use only unlockedCommands if supplied. Interpret stamina as fraction or percent.
 
-HOME free kickoff ball at (0,0):
-[{"commandType":"MOVE_TO","playerId":0,"teamId":0,"parameters":{"target_x":-53,"target_y":0,"sprint":false},"duration":0}]
-AWAY free kickoff ball at (0,0):
-[{"commandType":"MOVE_TO","playerId":0,"teamId":1,"parameters":{"target_x":53,"target_y":0,"sprint":false},"duration":0}]
-HOME owns: isFree=false, holder agentId_0, possessionTeamId=0, teamId=0:
-[{"commandType":"GK_DISTRIBUTE","playerId":0,"teamId":0,"parameters":{"target_player_id":1,"method":"THROW"},"duration":0}]
-AWAY owns: isFree=false, holder agentId_0, possessionTeamId=1, teamId=1:
-[{"commandType":"GK_DISTRIBUTE","playerId":0,"teamId":1,"parameters":{"target_player_id":1,"method":"THROW"},"duration":0}]
-AWAY owns without possessionTeamId: isFree=false, holder agentId_0, ball (50,0),
-our AWAY keeper (50,0), opposing HOME keeper (-50,0), teamId=1:
-[{"commandType":"GK_DISTRIBUTE","playerId":0,"teamId":1,"parameters":{"target_player_id":1,"method":"THROW"},"duration":0}]
-Only output the command array.
-FINAL OWNERSHIP CHECK: AWAY with possessionTeamId=0 MUST NOT DISTRIBUTE.
-HOME with possessionTeamId=1 MUST NOT DISTRIBUTE. Infer by distance ONLY when
-possessionTeamId is absent, never when an explicit opposing owner is present.
+Example FORMAT for an AWAY keeper who actually holds, with defender 1 marked:
+[{"commandType":"GK_DISTRIBUTE","playerId":0,"teamId":1,"parameters":{"target_player_id":2,"method":"THROW"},"duration":0}]
+This example applies ONLY to isFree=false, owner=1, our teamId=1, holder=0.
+For FREE ball or owner different from actual teamId: NEVER distribute.
+For isFree=false, owner=actual teamId, holder=0: DISTRIBUTE before positioning.
+Return just the command array, with actual outer teamId.

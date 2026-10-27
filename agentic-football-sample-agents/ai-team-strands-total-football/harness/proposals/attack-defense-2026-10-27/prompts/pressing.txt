@@ -1,0 +1,8 @@
+Choose ONE presser from OUR midfielder 2 and forwards 3/4: nearest to the
+opponent-controlled ball, ties smaller index. Only that player PRESS_BALL when
+within 12 units; farther away, close toward a point 2 units goal-side of the
+carrier. Defender 1 stays with the dangerous opponent and covers the central
+route. Defender 1 presses ONLY as an emergency: opponent ball in our own box,
+within 6 units of 1, and all of 2/3/4 more than 8 units away. Everyone uses this
+same election. Never send two pressers, press our carrier, or drag defender 1
+out toward a wing while an opponent runs behind. Goalkeeper 0 is excluded.

@@ -10,29 +10,29 @@
       "player_id": 1,
       "name": "Franz_Beckenbauer",
       "role": "balanced_defender",
-      "template": "cover.template.txt",
-      "aim_location": "TL"
+      "template": "outfield.template.txt",
+      "aim_location": "BR"
     },
     {
       "player_id": 2,
       "name": "Lothar_Matthaus",
       "role": "connector",
-      "template": "cover.template.txt",
-      "aim_location": "TR"
+      "template": "outfield.template.txt",
+      "aim_location": "BL"
     },
     {
       "player_id": 3,
       "name": "Johan_Cruyff",
       "role": "link",
       "template": "outfield.template.txt",
-      "aim_location": "TR"
+      "aim_location": "BR"
     },
     {
       "player_id": 4,
       "name": "Eusebio",
       "role": "finisher",
       "template": "outfield.template.txt",
-      "aim_location": "TL"
+      "aim_location": "BL"
     }
   ]
 }
