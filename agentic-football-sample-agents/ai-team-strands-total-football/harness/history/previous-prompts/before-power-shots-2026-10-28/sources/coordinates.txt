@@ -1,0 +1,26 @@
+COORDINATES FIRST, before any distance, possession, shooting or trajectory test:
+The live match can use a SMALL pitch whereas fitness tests use a LARGE pitch.
+Read pitch/goal metadata first when supplied. Without metadata, select SMALL only
+when BOTH home and away keepers exist, ALL players and ball have abs(x)<=8,
+and ball.position has numeric z. A keeper roaming forward does not change scale.
+Otherwise select LARGE. Never decide pitch scale from the carrier alone.
+SMALL fallback half-length=6.4, half-width=4.07; LARGE=55,35. The SMALL bounds
+are approximate defaults, not measurements from a keeper's current position.
+Let H be the selected actual half-length and K=55/H (SMALL fallback K=8.59375;
+LARGE K=1). For all tactical rules below use an internal DESIGN frame:
+  player X=raw.position.x*K, Y=raw.position.y*K;
+  ball X=raw.position.x*K, Y=(numeric raw.position.z if present, else raw.position.y)*K;
+  ball VX=raw.velocity.x*K, VY=(numeric raw.velocity.z if present, else raw.velocity.y)*K.
+In a 3D ball record, raw y is HEIGHT, never lateral pitch position. A numeric z=0
+is valid and MUST be used. Player y remains lateral; do not substitute player z.
+Scale explicit goal centers, posts and field bounds by K too. Preserve all world
+signs for both teams: do not rotate or mirror positions/velocity. All references
+below to ball.x, ball.y, vx, vy, player positions, distances, margins and role
+offsets mean DESIGN values. Time, stamina, IDs, power and intensity are unscaled.
+When producing MOVE_TO, divide final DESIGN target_x and target_y by K exactly
+ONCE and clamp to actual field bounds with margin1/K. Emit actual world units,
+NEVER the internal DESIGN values. For SMALL a design x=54 becomes actual6.284,
+not54. This conversion applies to EVERY movement, including saves and kickoffs.
+For SHOOT use aim_location:CENTER on BOTH flanks and BOTH teams. CENTER is the
+goal-center aim enum, not ball.y, camera-left/right, near post or far post.
+Never invent shooting target coordinates. Never flip aim with attacking flank.

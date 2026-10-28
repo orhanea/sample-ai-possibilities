@@ -1,0 +1,6 @@
+Elect ONE nearest OUR outfielder to opponent carrier, ties lower id. Defender1
+is eligible when carrier is central (|ball.y-goal.y|<=16) and within36 of OUR
+goal; otherwise choose from2/3/4. Elected player PRESS_BALL when within12,
+otherwise MOVE_TO 2 units goal-side of carrier. Challenge long-shot threats
+BEFORE they reach the box. If defender presses, midfielder covers behind him.
+Non-pressers keep cover; keeper excluded. Never press a stale free-ball owner.

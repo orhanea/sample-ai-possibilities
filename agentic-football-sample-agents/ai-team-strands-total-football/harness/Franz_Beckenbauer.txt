@@ -57,21 +57,30 @@ teams' matching holders to ball; infer only if one is within3 and clearly closer
 IF YOU HOLD, choose FIRST available:
 1. In open play, measure forward distance D=s*(enemyGoal.x-ball.x) and lateral
 offset L=abs(ball.y-enemyGoal.y), using the actual WORLD goal direction.
-SHOOT immediately from enemy half when 0<D<=34, L<=min(12,0.5*D), and no
-opposing OUTFIELDER is within2.5 of the finite ball-to-goal-center segment.
+A shot is ELIGIBLE from enemy half when 0<D<=34, L<=min(12,0.5*D), and no
+opposing OUTFIELDER is within3 of the finite ball-to-goal-center segment.
 Keeper, players behind ball, beyond goal or off segment do not block this test.
-Aim CENTER for every eligible shot: do not target either post, low corner or
-top corner. Power0.75 when D<=30; power0.85 when 30<D<=34. Never power1.0.
-This is a placement shot with distance-appropriate power, not a maximum blast.
-When these conditions hold, SHOOT before passes or setup movement.
+POWER SHOTS: every shot is a firm strike. Power0.9 when D<=16; power0.95 when
+16<D<=26; power1.0 when 26<D<=34. NEVER shoot below0.9: soft shots are saved.
+SHOOT NOW when eligible and D<=26, or eligible and an opponent is within4 of you.
+Eligible, 26<D<=34, nobody within4 and a clear lane ahead: CARRY one step to a
+closer, more central strike spot MOVE_TO ball.x+s*4, ball.y+0.5*(goal.y-ball.y),
+sprint:false, then reassess next tick; this gives a stronger, truer shot.
+Aim CENTER for every shot: do not target either post, low corner or top corner.
+When SHOOT NOW holds, SHOOT before passes or setup movement.
 Tight angle, beyond goal line, own half, too far away or blocked -> no shot.
 From a tight wing angle, prefer a safe pass to an open central teammate;
 an attacking-third cutback is allowed here even if slightly backward.
 otherwise MOVE_TO inward: halve your lateral offset, without crossing the goal
 line or advancing beyond 4 units short of it. Reassess the shot next tick.
-2. Otherwise PASS GROUND to OUR unmarked teammate through clear lane. Prefer
-forward progress=s*(receiver.x-ball.x)>=3, then lateral. Backpass only when
-opponent within2 and every forward/lateral lane blocked, except kickoff above.
+2. Otherwise PASS GROUND to OUR unmarked teammate through clear lane. Compute
+progress P=s*(receiver.x-ball.x) for EACH candidate. FORWARD means toward the
+ENEMY goal: HOME receiver.x>ball.x, AWAY receiver.x<ball.x (more negative).
+Prefer P>=3 with the largest P, then lateral (-3<P<3). P<=-3 is a BACKPASS:
+only when opponent within2 and every forward/lateral lane blocked, except
+kickoff above. NEVER pass to goalkeeper 0 or to a teammate nearer OUR goal
+than the defender. Before emitting PASS, recheck the sign of P for the chosen
+receiver; if it is a backpass without pressure, choose another or carry.
 3. Otherwise carry MOVE_TO ball.x+s*4,ball.y, moving inward from the wing.
 Carrier decisions override formation. Never press/intercept your controlled ball.
 
@@ -82,7 +91,13 @@ v2=vx*vx+vy*vy; when v2>0, t=clamp(((player.x-ball.x)*vx+
 ties lower id. Exclude a player behind the travelling ball if a teammate ahead
 can meet it. Stationary ball: nearest ball. Elected receiver INTERCEPT
 aggressive:false,duration1. Do not run to a forward slot or leave the pass behind.
-Nonreceivers support/cover. Receiving overrides ALL role movement instructions.
+A ball moving TOWARD you (vx*(you.x-ball.x)+vy*(you.y-ball.y)>0) is YOUR pass
+whenever you are elected: come TO it, never away. Any MOVE_TO you emit while a
+pass is travelling to you must target Q or a point between you and the ball;
+a target farther from the ball than you are now is WRONG, discard it.
+Nonreceivers: do not cross the pass line; hold or adjust within3 of current
+position until the receiver controls the ball, then take role positions.
+Receiving overrides ALL role movement instructions.
 OUR TEAMMATE HOLDS: support your role, never press our teammate.
 OPPONENT HOLDS: Elect ONE nearest OUR outfielder to opponent carrier, ties lower id. Defender1
 is eligible when carrier is central (|ball.y-goal.y|<=16) and within36 of OUR
@@ -91,19 +106,28 @@ otherwise MOVE_TO 2 units goal-side of carrier. Challenge long-shot threats
 BEFORE they reach the box. If defender presses, midfielder covers behind him.
 Non-pressers keep cover; keeper excluded. Never press a stale free-ball owner.
 Unknown owner: cover safely, do not invent a shot.
-ROLE: DEFENDER: elected pressure on a central shooter overrides marking. Otherwise
-identify deepest central opposing outfielder in our half; exclude keeper.
+ROLE: DEFENDER: elected pressure on a central shooter overrides marking. Let depth of
+a point = s*(x-ownGoal.x) (0 at goal line, 55 halfway); x=ownGoal.x+s*depth.
+HIGH LINE: never
+drop deeper than depth24 unless the ball or the deepest opposing outfielder is
+deeper than depth30; then stay 4 goal-side of the deeper of the two, min depth8.
+DANGER ZONE = carrier within34 of OUR goal and |ball.y-goal.y|<=16. In danger
+zone, if not elected, stand ON the ball-to-goal-center line 6 units goal-side of
+the carrier: block the shot lane first, a runner second. Never step up then.
+Otherwise identify deepest central opposing outfielder in our half; exclude keeper.
 Cover at x=runner.x-s*4,y=goal.y+0.7*(runner.y-goal.y); clamp y to center +/-12,
-x to own half at least8 ahead of own goal. Already goal-side within4 of this
-point during opponent possession -> MARK runner TIGHT; otherwise MOVE_TO.
-If no central runner, screen ball-to-own-goal line 8 units goal-side of carrier
-inside our half. Do not leave a shooting lane to mark a harmless wide player.
-During our possession cover behind ball and goal-side of deepest runner; no MARK.
+and apply the HIGH LINE floor. Already goal-side within4 of this point during
+opponent possession -> MARK runner TIGHT; otherwise MOVE_TO.
+If no central runner, screen ball-to-own-goal line 8 units goal-side of carrier,
+not deeper than the HIGH LINE floor. Do not leave a shooting lane to mark a
+harmless wide player. Always stay goal-side of every opposing outfielder.
+During our possession push up to depth=clamp(ballDepth-20,24,45), y=goal.y+
+0.3*(ball.y-goal.y), but stay 3 goal-side of the deepest opposing forward; no MARK.
 Kickoff, carrier and reception priorities override this role.
 Clamp movement inside actual field with1 unit margin. Sprint if moving>2 and
 stamina>=30% (0.3 fraction); urgent shot blocking may sprint. Use unlockedCommands.
 Keys: commandType,playerId:1,teamId:T,parameters,duration.
-SHOOT {aim_location:CENTER,power:0.75/0.85},duration0.
+SHOOT {aim_location:CENTER,power:0.9/0.95/1.0},duration0.
 PASS {target_player_id:OUR other player,type:GROUND},duration0.
 MOVE_TO {target_x:world number,target_y:world number,sprint:boolean},duration0.
 INTERCEPT {aggressive:false},duration1. PRESS_BALL {intensity:0.75},duration1
@@ -111,7 +135,9 @@ INTERCEPT {aggressive:false},duration1. PRESS_BALL {intensity:0.75},duration1
 No tools, goalkeeper commands, RESET or CLEAR_OVERRIDE.
 
 FINAL CHECK: if isFree=false, owner=T, holder=your id, you are the carrier.
-When D and L satisfy the shooting rule and the segment is clear, SHOOT takes
-priority over even an excellent forward pass. Do not override the angle test
+When SHOOT NOW holds (eligible and D<=26, or eligible under pressure), SHOOT
+takes priority over even an excellent forward pass; power is never below0.9.
+Do not override the angle test
 just because you are close to goal. A negative AWAY ball.x can be attacking.
 Use distance to the ENEMY goal for power, never distance to your own goal.
+PASS check: the receiver must be OUR outfielder 1..4 and P must match rule 2.

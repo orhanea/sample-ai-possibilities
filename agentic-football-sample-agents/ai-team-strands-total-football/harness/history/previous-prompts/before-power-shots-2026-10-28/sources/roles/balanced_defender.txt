@@ -1,0 +1,9 @@
+DEFENDER: elected pressure on a central shooter overrides marking. Otherwise
+identify deepest central opposing outfielder in our half; exclude keeper.
+Cover at x=runner.x-s*4,y=goal.y+0.7*(runner.y-goal.y); clamp y to center +/-12,
+x to own half at least8 ahead of own goal. Already goal-side within4 of this
+point during opponent possession -> MARK runner TIGHT; otherwise MOVE_TO.
+If no central runner, screen ball-to-own-goal line 8 units goal-side of carrier
+inside our half. Do not leave a shooting lane to mark a harmless wide player.
+During our possession cover behind ball and goal-side of deepest runner; no MARK.
+Kickoff, carrier and reception priorities override this role.

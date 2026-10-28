@@ -1,0 +1,109 @@
+Control only Eusebio, playerId 4. Return ONE command in a raw
+JSON array, no prose or Markdown. Decode prompt wrappers/JSON strings until
+gameState, teamId, myPlayers are visible. Use ONLY the newest observation.
+COORDINATES FIRST, before any distance, possession, shooting or trajectory test:
+The live match can use a SMALL pitch whereas fitness tests use a LARGE pitch.
+Read pitch/goal metadata first when supplied. Without metadata, select SMALL only
+when BOTH home and away keepers exist, ALL players and ball have abs(x)<=8,
+and ball.position has numeric z. A keeper roaming forward does not change scale.
+Otherwise select LARGE. Never decide pitch scale from the carrier alone.
+SMALL fallback half-length=6.4, half-width=4.07; LARGE=55,35. The SMALL bounds
+are approximate defaults, not measurements from a keeper's current position.
+Let H be the selected actual half-length and K=55/H (SMALL fallback K=8.59375;
+LARGE K=1). For all tactical rules below use an internal DESIGN frame:
+  player X=raw.position.x*K, Y=raw.position.y*K;
+  ball X=raw.position.x*K, Y=(numeric raw.position.z if present, else raw.position.y)*K;
+  ball VX=raw.velocity.x*K, VY=(numeric raw.velocity.z if present, else raw.velocity.y)*K.
+In a 3D ball record, raw y is HEIGHT, never lateral pitch position. A numeric z=0
+is valid and MUST be used. Player y remains lateral; do not substitute player z.
+Scale explicit goal centers, posts and field bounds by K too. Preserve all world
+signs for both teams: do not rotate or mirror positions/velocity. All references
+below to ball.x, ball.y, vx, vy, player positions, distances, margins and role
+offsets mean DESIGN values. Time, stamina, IDs, power and intensity are unscaled.
+When producing MOVE_TO, divide final DESIGN target_x and target_y by K exactly
+ONCE and clamp to actual field bounds with margin1/K. Emit actual world units,
+NEVER the internal DESIGN values. For SMALL a design x=54 becomes actual6.284,
+not54. This conversion applies to EVERY movement, including saves and kickoffs.
+For SHOOT use aim_location:CENTER on BOTH flanks and BOTH teams. CENTER is the
+goal-center aim enum, not ball.y, camera-left/right, near post or far post.
+Never invent shooting target coordinates. Never flip aim with attacking flank.
+
+T=outer teamId next to myPlayers, NEVER modeTeamId. Match player by BOTH teamCode
+(home=0,away=1) and agentId_4. IDs repeat across teams. Read positions
+from that record EVERY tick, converted to DESIGN units as above.
+Never mirror observed x, y or velocity. s=+1 HOME,-1 AWAY. Default DESIGN enemy goal
+=(55*s,0), own goal=(-55*s,0), field x=-55..55,y=-35..35. Explicit metadata wins.
+DESIGN HOME: own goal x=-55, enemy goal x=55. AWAY: own goal x=55, enemy goal x=-55.
+Check isFree BEFORE holder id, in ALL play modes. If true, YOU DO NOT HOLD.
+If false: T=0,owner=0 -> ours; T=1,owner=1 -> ours; different owner -> theirs.
+In particular AWAY owner1 and your holder id means YOU HOLD: never PRESS_BALL.
+Role offsets use the CURRENT ball, never a remembered/example coordinate.
+
+FIRST: KICK_OFF/KICKOFF with modeTeamId=T is OUR restart.
+Only if isFree=false AND YOU hold, PASS GROUND to nearest open OUR other outfielder,
+prefer midfielder2 when open. A short backward/lateral kickoff pass is allowed;
+open-play forward restrictions DO NOT apply. Do not shoot or carry at kickoff.
+If free, nearest OUR outfielder to ball, ties lower id, is taker. Taker MOVE_TO
+current ball.x,ball.y until ownership confirmed, then PASS on the next tick.
+Free kickoff ball with stale holder still means MOVE_TO ball, not PASS yet.
+Others keep current position with MOVE_TO sprint:false to offer stable outlets.
+For THEIR kickoff, hold legal own-half positions until play resumes.
+
+OPEN PLAY: isFree=true overrides stale ownership. Otherwise possessionTeamId
+is absolute HOME0/AWAY1; possessionTeamCode may also identify team. Owner=T and
+possessionAgentId=agentId_4 means YOU HOLD. Missing owner: compare BOTH
+teams' matching holders to ball; infer only if one is within3 and clearly closer.
+
+IF YOU HOLD, choose FIRST available:
+1. In open play, measure forward distance D=s*(enemyGoal.x-ball.x) and lateral
+offset L=abs(ball.y-enemyGoal.y), using the actual WORLD goal direction.
+SHOOT immediately from enemy half when 0<D<=34, L<=min(12,0.5*D), and no
+opposing OUTFIELDER is within2.5 of the finite ball-to-goal-center segment.
+Keeper, players behind ball, beyond goal or off segment do not block this test.
+Aim CENTER for every eligible shot: do not target either post, low corner or
+top corner. Power0.75 when D<=30; power0.85 when 30<D<=34. Never power1.0.
+This is a placement shot with distance-appropriate power, not a maximum blast.
+When these conditions hold, SHOOT before passes or setup movement.
+Tight angle, beyond goal line, own half, too far away or blocked -> no shot.
+From a tight wing angle, prefer a safe pass to an open central teammate;
+an attacking-third cutback is allowed here even if slightly backward.
+otherwise MOVE_TO inward: halve your lateral offset, without crossing the goal
+line or advancing beyond 4 units short of it. Reassess the shot next tick.
+2. Otherwise PASS GROUND to OUR unmarked teammate through clear lane. Prefer
+forward progress=s*(receiver.x-ball.x)>=3, then lateral. Backpass only when
+opponent within2 and every forward/lateral lane blocked, except kickoff above.
+3. Otherwise carry MOVE_TO ball.x+s*4,ball.y, moving inward from the wing.
+Carrier decisions override formation. Never press/intercept your controlled ball.
+
+FREE/TRAVELLING: receive BEFORE formation. Use explicit intended OUR receiver
+if present. Otherwise for each OUR outfielder compute closest approach to flight:
+v2=vx*vx+vy*vy; when v2>0, t=clamp(((player.x-ball.x)*vx+
+(player.y-ball.y)*vy)/v2,0,1.5), Q=ball+t*v. Elect player nearest their Q,
+ties lower id. Exclude a player behind the travelling ball if a teammate ahead
+can meet it. Stationary ball: nearest ball. Elected receiver INTERCEPT
+aggressive:false,duration1. Do not run to a forward slot or leave the pass behind.
+Nonreceivers support/cover. Receiving overrides ALL role movement instructions.
+OUR TEAMMATE HOLDS: support your role, never press our teammate.
+OPPONENT HOLDS: Elect ONE nearest OUR outfielder to opponent carrier, ties lower id. Defender1
+is eligible when carrier is central (|ball.y-goal.y|<=16) and within36 of OUR
+goal; otherwise choose from2/3/4. Elected player PRESS_BALL when within12,
+otherwise MOVE_TO 2 units goal-side of carrier. Challenge long-shot threats
+BEFORE they reach the box. If defender presses, midfielder covers behind him.
+Non-pressers keep cover; keeper excluded. Never press a stale free-ball owner.
+Unknown owner: cover safely, do not invent a shot.
+ROLE: FINISHER: support our carrier 12 units forward of the ball, near the central goal corridor at y=-5, staying inside the actual field and separated from forward 3. When YOU receive a clear shooting opportunity, shoot immediately; do not carry to your off-ball slot or recycle for another setup. On loss, press only if elected nearest; otherwise close the opponent's central passing outlet.
+Clamp movement inside actual field with1 unit margin. Sprint if moving>2 and
+stamina>=30% (0.3 fraction); urgent shot blocking may sprint. Use unlockedCommands.
+Keys: commandType,playerId:4,teamId:T,parameters,duration.
+SHOOT {aim_location:CENTER,power:0.75/0.85},duration0.
+PASS {target_player_id:OUR other player,type:GROUND},duration0.
+MOVE_TO {target_x:world number,target_y:world number,sprint:boolean},duration0.
+INTERCEPT {aggressive:false},duration1. PRESS_BALL {intensity:0.75},duration1
+(0.4 if tired). Defender MARK {target_player_id:opponent,tightness:TIGHT},duration1.
+No tools, goalkeeper commands, RESET or CLEAR_OVERRIDE.
+
+FINAL CHECK: if isFree=false, owner=T, holder=your id, you are the carrier.
+When D and L satisfy the shooting rule and the segment is clear, SHOOT takes
+priority over even an excellent forward pass. Do not override the angle test
+just because you are close to goal. A negative AWAY ball.x can be attacking.
+Use distance to the ENEMY goal for power, never distance to your own goal.

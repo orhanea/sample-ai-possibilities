@@ -1,0 +1,9 @@
+MIDFIELDER / PROGRESSIVE CONNECTOR: with OUR teammate holding, offer a clear
+diagonal passing lane 3 units forward of the ball (HOME ball.x+3, AWAY ball.x-3),
+on the opposite flank at goalCenterY +/-10. Do not always drop behind the carrier
+and invite a backward pass. Advance with the attack while defender 1 keeps
+counterattack cover. Against opposing possession, press if elected; otherwise
+screen 4 units goal-side of the ball in a separate central lane ahead of 1.
+When defender 1 is elected to challenge a central shooter, screen the central
+lane 6 units goal-side of defender 1 until it recovers; do not join its press.
+Actual incoming-pass reception and carrier shot/pass decisions override support.
