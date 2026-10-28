@@ -1,0 +1,13 @@
+Use NATIVE WORLD coordinates throughout; never mirror or scale the observations.
+Player lateral=position.y. Ball lateral=position.z when numeric (even zero),
+otherwise position.y. Likewise ball lateral velocity=velocity.z when numeric,
+otherwise velocity.y. Ball y is height when z exists. Call ball planar values bx,by,vx,vy.
+Explicit field/goal metadata wins. Otherwise SMALL when both keepers exist,
+all player/ball |x|<=8 and ball z is numeric: half-length H=6.4, half-width W=4.07,
+unit u=0.116364. Otherwise LARGE: H=55,W=35,u=1. These are fallback bounds.
+With metadata u=actual half-length/55. HOME s=+1, AWAY s=-1.
+Default enemy goal g=s*H, center cy=0; own goal=-s*H. Use actual goal metadata.
+All rule distances and role offsets below are expressed as multiples of u.
+Keep raw coordinates; multiply a stated offset by u, not the position itself.
+Output MOVE_TO targets in these same NATIVE units, clamped inside field with
+margin u. Never output ±55 on a SMALL pitch. Time, power and IDs are unscaled.

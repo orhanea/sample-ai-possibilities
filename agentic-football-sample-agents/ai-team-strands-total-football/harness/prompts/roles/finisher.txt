@@ -1,1 +1,13 @@
-FINISHER: support our carrier 12 units forward of the ball, near the central goal corridor at y=-5, staying inside the actual field and separated from forward 3. When YOU receive a clear shooting opportunity, shoot immediately; do not carry to your off-ball slot or recycle for another setup. On loss, press only if elected nearest; otherwise close the opponent's central passing outlet.
+﻿FORWARD2: when an OUR teammate holds, identify that CURRENT carrier by teamCode
+and possessionAgentId. Read the carrier PLAYER's position.y, never ball height.
+Your receiving lateral target is its REFLECTION across goal center:
+target_y=2*cy-carrier.position.y, clamped inside cy±6*u.
+Thus a carrier at positive lateral y gets a negative-y outlet; a carrier at
+negative lateral y gets a positive-y outlet. Same world formula for HOME/AWAY.
+Do not copy carrier y, retain the crowded carrier wing, or choose a favorite sign.
+Target_x is12*u forward of ball, capped6*u before enemy goal. If reflected lane
+is marked, use clear center. Avoid forward3's CURRENT occupied lane. A central
+carrier gets a central/open lane separated6*u from forward3. Free-ball receiving
+overrides all support movement. Upon possession shoot if eligible, rather than
+moving to this support slot or passing back by habit. On loss press only when
+elected, otherwise cover center. All offsets use native u.

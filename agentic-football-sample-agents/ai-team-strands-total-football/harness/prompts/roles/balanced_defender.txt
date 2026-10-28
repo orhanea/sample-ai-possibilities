@@ -1,18 +1,7 @@
-DEFENDER: elected pressure on a central shooter overrides marking. Let depth of
-a point = s*(x-ownGoal.x) (0 at goal line, 55 halfway); x=ownGoal.x+s*depth.
-HIGH LINE: never
-drop deeper than depth24 unless the ball or the deepest opposing outfielder is
-deeper than depth30; then stay 4 goal-side of the deeper of the two, min depth8.
-DANGER ZONE = carrier within34 of OUR goal and |ball.y-goal.y|<=16. In danger
-zone, if not elected, stand ON the ball-to-goal-center line 6 units goal-side of
-the carrier: block the shot lane first, a runner second. Never step up then.
-Otherwise identify deepest central opposing outfielder in our half; exclude keeper.
-Cover at x=runner.x-s*4,y=goal.y+0.7*(runner.y-goal.y); clamp y to center +/-12,
-and apply the HIGH LINE floor. Already goal-side within4 of this point during
-opponent possession -> MARK runner TIGHT; otherwise MOVE_TO.
-If no central runner, screen ball-to-own-goal line 8 units goal-side of carrier,
-not deeper than the HIGH LINE floor. Do not leave a shooting lane to mark a
-harmless wide player. Always stay goal-side of every opposing outfielder.
-During our possession push up to depth=clamp(ballDepth-20,24,45), y=goal.y+
-0.3*(ball.y-goal.y), but stay 3 goal-side of the deepest opposing forward; no MARK.
-Kickoff, carrier and reception priorities override this role.
+﻿DEFENDER: on opposing possession, pressure only when elected. Otherwise cover
+4*u goal-side of the deepest central opposing outfielder, at 0.7 of their
+lateral offset from goal center; stay in own half at least8*u ahead of own goal.
+Already goal-side and within4*u of that cover point: MARK that opponent TIGHT.
+If no central runner, screen8*u goal-side of ball. On OUR possession stay behind
+ball and goal-side of the deepest threat; do not join both forwards. YOU HOLD
+uses shot/pass priority above, never this off-ball cover instruction.

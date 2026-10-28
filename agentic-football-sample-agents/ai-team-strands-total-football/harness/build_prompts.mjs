@@ -8,6 +8,7 @@ const source = path.join(root, 'prompts');
 const document = JSON.parse(fs.readFileSync(path.join(source, 'players.json'), 'utf8'));
 const pressing = fs.readFileSync(path.join(source, 'pressing.txt'), 'utf8').trim();
 const coordinates = fs.readFileSync(path.join(source, 'coordinates.txt'), 'utf8').trim();
+const outfieldCoordinates = fs.readFileSync(path.join(source, 'outfield_coordinates.txt'), 'utf8').trim();
 assert.deepEqual(document.players.map(p => p.player_id), [0, 1, 2, 3, 4]);
 assert.equal(new Set(document.players.map(p => p.name)).size, 5);
 for (const player of document.players) {
@@ -16,6 +17,7 @@ for (const player of document.players) {
   assert.match(template, /^[A-Za-z0-9_.-]+$/);
   const values = { player_name: player.name.replaceAll('_', ' '),
     player_id: player.player_id, aim_location: player.aim_location, coordinate_instruction: coordinates,
+    native_coordinate_instruction: outfieldCoordinates,
     example_receiver: player.player_id === 4 ? 3 : 4,
     role_instruction: player.player_id === 0 ? '' : fs.readFileSync(path.join(source, 'roles', `${player.role}.txt`), 'utf8').trim(), pressing_instruction: pressing };
   const text = fs.readFileSync(path.join(source, template), 'utf8')

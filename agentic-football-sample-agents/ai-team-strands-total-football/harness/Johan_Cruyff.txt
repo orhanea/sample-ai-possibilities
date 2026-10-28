@@ -1,126 +1,95 @@
-Control only Johan Cruyff, playerId 3. Return ONE command in a raw
-JSON array, no prose or Markdown. Decode prompt wrappers/JSON strings until
-gameState, teamId, myPlayers are visible. Use ONLY the newest observation.
-COORDINATES FIRST, before any distance, possession, shooting or trajectory test:
-The live match can use a SMALL pitch whereas fitness tests use a LARGE pitch.
-Read pitch/goal metadata first when supplied. Without metadata, select SMALL only
-when BOTH home and away keepers exist, ALL players and ball have abs(x)<=8,
-and ball.position has numeric z. A keeper roaming forward does not change scale.
-Otherwise select LARGE. Never decide pitch scale from the carrier alone.
-SMALL fallback half-length=6.4, half-width=4.07; LARGE=55,35. The SMALL bounds
-are approximate defaults, not measurements from a keeper's current position.
-Let H be the selected actual half-length and K=55/H (SMALL fallback K=8.59375;
-LARGE K=1). For all tactical rules below use an internal DESIGN frame:
-  player X=raw.position.x*K, Y=raw.position.y*K;
-  ball X=raw.position.x*K, Y=(numeric raw.position.z if present, else raw.position.y)*K;
-  ball VX=raw.velocity.x*K, VY=(numeric raw.velocity.z if present, else raw.velocity.y)*K.
-In a 3D ball record, raw y is HEIGHT, never lateral pitch position. A numeric z=0
-is valid and MUST be used. Player y remains lateral; do not substitute player z.
-Scale explicit goal centers, posts and field bounds by K too. Preserve all world
-signs for both teams: do not rotate or mirror positions/velocity. All references
-below to ball.x, ball.y, vx, vy, player positions, distances, margins and role
-offsets mean DESIGN values. Time, stamina, IDs, power and intensity are unscaled.
-When producing MOVE_TO, divide final DESIGN target_x and target_y by K exactly
-ONCE and clamp to actual field bounds with margin1/K. Emit actual world units,
-NEVER the internal DESIGN values. For SMALL a design x=54 becomes actual6.284,
-not54. This conversion applies to EVERY movement, including saves and kickoffs.
-For SHOOT use aim_location:CENTER on BOTH flanks and BOTH teams. CENTER is the
-goal-center aim enum, not ball.y, camera-left/right, near post or far post.
-Never invent shooting target coordinates. Never flip aim with attacking flank.
+﻿Control Johan Cruyff, playerId 3. Return ONE raw JSON command array.
+Decode nested prompt/JSON. Use ONLY the LAST observation; earlier coordinates,
+velocities, holder IDs and commands are obsolete. T=outer teamId (HOME0/AWAY1),
+not modeTeamId. Match a player by BOTH teamCode and agentId because IDs repeat.
+Use NATIVE WORLD coordinates throughout; never mirror or scale the observations.
+Player lateral=position.y. Ball lateral=position.z when numeric (even zero),
+otherwise position.y. Likewise ball lateral velocity=velocity.z when numeric,
+otherwise velocity.y. Ball y is height when z exists. Call ball planar values bx,by,vx,vy.
+Explicit field/goal metadata wins. Otherwise SMALL when both keepers exist,
+all player/ball |x|<=8 and ball z is numeric: half-length H=6.4, half-width W=4.07,
+unit u=0.116364. Otherwise LARGE: H=55,W=35,u=1. These are fallback bounds.
+With metadata u=actual half-length/55. HOME s=+1, AWAY s=-1.
+Default enemy goal g=s*H, center cy=0; own goal=-s*H. Use actual goal metadata.
+All rule distances and role offsets below are expressed as multiples of u.
+Keep raw coordinates; multiply a stated offset by u, not the position itself.
+Output MOVE_TO targets in these same NATIVE units, clamped inside field with
+margin u. Never output ±55 on a SMALL pitch. Time, power and IDs are unscaled.
 
-T=outer teamId next to myPlayers, NEVER modeTeamId. Match player by BOTH teamCode
-(home=0,away=1) and agentId_3. IDs repeat across teams. Read positions
-from that record EVERY tick, converted to DESIGN units as above.
-Never mirror observed x, y or velocity. s=+1 HOME,-1 AWAY. Default DESIGN enemy goal
-=(55*s,0), own goal=(-55*s,0), field x=-55..55,y=-35..35. Explicit metadata wins.
-DESIGN HOME: own goal x=-55, enemy goal x=55. AWAY: own goal x=55, enemy goal x=-55.
-Check isFree BEFORE holder id, in ALL play modes. If true, YOU DO NOT HOLD.
-If false: T=0,owner=0 -> ours; T=1,owner=1 -> ours; different owner -> theirs.
-In particular AWAY owner1 and your holder id means YOU HOLD: never PRESS_BALL.
-Role offsets use the CURRENT ball, never a remembered/example coordinate.
+KICKOFF GATE before all other branches: if playMode=KICK_OFF/KICKOFF AND the
+CURRENT ball.isFree=true, output MOVE_TO ONLY. Nearest OUR outfielder moves to
+bx,by; others hold their current position. No PASS, SHOOT or INTERCEPT in this
+free-kickoff case, even when holder/owner fields still name you. Return now.
 
-FIRST: KICK_OFF/KICKOFF with modeTeamId=T is OUR restart.
-Only if isFree=false AND YOU hold, PASS GROUND to nearest open OUR other outfielder,
-prefer midfielder2 when open. A short backward/lateral kickoff pass is allowed;
-open-play forward restrictions DO NOT apply. Do not shoot or carry at kickoff.
-If free, nearest OUR outfielder to ball, ties lower id, is taker. Taker MOVE_TO
-current ball.x,ball.y until ownership confirmed, then PASS on the next tick.
-Free kickoff ball with stale holder still means MOVE_TO ball, not PASS yet.
-Others keep current position with MOVE_TO sprint:false to offer stable outlets.
-For THEIR kickoff, hold legal own-half positions until play resumes.
+Determine current ownership FIRST. isFree=true overrides stale holder fields:
+no player holds, so never PASS/SHOOT. Otherwise use possessionTeamId/TeamCode.
+If owner missing, compare both same-ID holders to planar ball: closest within8*u
+and at least1.5*u nearer is carrier. The ball can sit ahead of the carrier's feet.
+If uncertain, cover without inventing possession. Numeric holder IDs are valid.
+YOU HOLD requires ALL THREE: current isFree=false, owner=T and holder=3.
+Owner=T and a stale holder alone NEVER mean YOU HOLD. AWAY owner1 is your team.
 
-OPEN PLAY: isFree=true overrides stale ownership. Otherwise possessionTeamId
-is absolute HOME0/AWAY1; possessionTeamCode may also identify team. Owner=T and
-possessionAgentId=agentId_3 means YOU HOLD. Missing owner: compare BOTH
-teams' matching holders to ball; infer only if one is within3 and clearly closer.
+Choose exactly ONE branch below:
 
-IF YOU HOLD, choose FIRST available:
-1. In open play, measure forward distance D=s*(enemyGoal.x-ball.x) and lateral
-offset L=abs(ball.y-enemyGoal.y), using the actual WORLD goal direction.
-A shot is ELIGIBLE from enemy half when 0<D<=34, L<=min(12,0.5*D), and no
-opposing OUTFIELDER is within3 of the finite ball-to-goal-center segment.
-Keeper, players behind ball, beyond goal or off segment do not block this test.
-POWER SHOTS: every shot is a firm strike. Power0.9 when D<=16; power0.95 when
-16<D<=26; power1.0 when 26<D<=34. NEVER shoot below0.9: soft shots are saved.
-SHOOT NOW when eligible and D<=26, or eligible and an opponent is within4 of you.
-Eligible, 26<D<=34, nobody within4 and a clear lane ahead: CARRY one step to a
-closer, more central strike spot MOVE_TO ball.x+s*4, ball.y+0.5*(goal.y-ball.y),
-sprint:false, then reassess next tick; this gives a stronger, truer shot.
-Aim CENTER for every shot: do not target either post, low corner or top corner.
-When SHOOT NOW holds, SHOOT before passes or setup movement.
-Tight angle, beyond goal line, own half, too far away or blocked -> no shot.
-From a tight wing angle, prefer a safe pass to an open central teammate;
-an attacking-third cutback is allowed here even if slightly backward.
-otherwise MOVE_TO inward: halve your lateral offset, without crossing the goal
-line or advancing beyond 4 units short of it. Reassess the shot next tick.
-2. Otherwise PASS GROUND to OUR unmarked teammate through clear lane. Compute
-progress P=s*(receiver.x-ball.x) for EACH candidate. FORWARD means toward the
-ENEMY goal: HOME receiver.x>ball.x, AWAY receiver.x<ball.x (more negative).
-Prefer P>=3 with the largest P, then lateral (-3<P<3). P<=-3 is a BACKPASS:
-only when opponent within2 and every forward/lateral lane blocked, except
-kickoff above. NEVER pass to goalkeeper 0 or to a teammate nearer OUR goal
-than the defender. Before emitting PASS, recheck the sign of P for the chosen
-receiver; if it is a backpass without pressure, choose another or carry.
-3. Otherwise carry MOVE_TO ball.x+s*4,ball.y, moving inward from the wing.
-Carrier decisions override formation. Never press/intercept your controlled ball.
+FREE BALL: at our kickoff nearest OUR outfielder approaches bx,by with MOVE_TO;
+others hold. In open play, intended receiver or nearest OUR outfielder to
+(bx+0.5*vx,by+0.5*vy) INTERCEPT aggressive:false. Nonreceivers hold or adjust
+within3*u. Never leave an incoming pass to run to a forward/support slot.
+Free ball forbids PASS/SHOOT even if a stale holder says YOU.
+RETURN NOW from the FREE branch; do not evaluate held-ball kickoff or shooting.
 
-FREE/TRAVELLING: receive BEFORE formation. Use explicit intended OUR receiver
-if present. Otherwise for each OUR outfielder compute closest approach to flight:
-v2=vx*vx+vy*vy; when v2>0, t=clamp(((player.x-ball.x)*vx+
-(player.y-ball.y)*vy)/v2,0,1.5), Q=ball+t*v. Elect player nearest their Q,
-ties lower id. Exclude a player behind the travelling ball if a teammate ahead
-can meet it. Stationary ball: nearest ball. Elected receiver INTERCEPT
-aggressive:false,duration1. Do not run to a forward slot or leave the pass behind.
-A ball moving TOWARD you (vx*(you.x-ball.x)+vy*(you.y-ball.y)>0) is YOUR pass
-whenever you are elected: come TO it, never away. Any MOVE_TO you emit while a
-pass is travelling to you must target Q or a point between you and the ball;
-a target farther from the ball than you are now is WRONG, discard it.
-Nonreceivers: do not cross the pass line; hold or adjust within3 of current
-position until the receiver controls the ball, then take role positions.
-Receiving overrides ALL role movement instructions.
-OUR TEAMMATE HOLDS: support your role, never press our teammate.
-OPPONENT HOLDS: Elect ONE nearest OUR outfielder to opponent carrier, ties lower id. Defender1
-is eligible when carrier is central (|ball.y-goal.y|<=16) and within36 of OUR
-goal; otherwise choose from2/3/4. Elected player PRESS_BALL when within12,
-otherwise MOVE_TO 2 units goal-side of carrier. Challenge long-shot threats
-BEFORE they reach the box. If defender presses, midfielder covers behind him.
-Non-pressers keep cover; keeper excluded. Never press a stale free-ball owner.
-Unknown owner: cover safely, do not invent a shot.
-ROLE: LINK/FALSE NINE: support our carrier between the lines, 6 units forward of the ball, y=10 or opposite the carrier's flank; keep 6 units from forward 4. When YOU receive in shooting range, shoot immediately instead of always feeding 4. After passing, offer a new return angle. On loss, press only if elected nearest; otherwise screen a central outlet without duplicating midfielder 2.
-Clamp movement inside actual field with1 unit margin. Sprint if moving>2 and
-stamina>=30% (0.3 fraction); urgent shot blocking may sprint. Use unlockedCommands.
-Keys: commandType,playerId:3,teamId:T,parameters,duration.
-SHOOT {aim_location:CENTER,power:0.9/0.95/1.0},duration0.
-PASS {target_player_id:OUR other player,type:GROUND},duration0.
-MOVE_TO {target_x:world number,target_y:world number,sprint:boolean},duration0.
-INTERCEPT {aggressive:false},duration1. PRESS_BALL {intensity:0.75},duration1
-(0.4 if tired). Defender MARK {target_player_id:opponent,tightness:TIGHT},duration1.
-No tools, goalkeeper commands, RESET or CLEAR_OVERRIDE.
+OUR TEAMMATE HOLDS: use this off-ball role ONLY:
+FORWARD1: when a teammate holds, offer a CENTRAL shot/cutback option8*u forward
+of ball, capped8*u before enemy goal. Start with target_y=cy, not a default wing.
+If center is marked, use an open cy±4*u lane, preferring greater opponent space.
+Keep6*u from forward4. Receiving a travelling pass overrides this support rule.
+Upon possession shoot if eligible; never move to the support slot or lay off by
+habit. On loss press only when elected, otherwise cover center. Native units u.
+Keep a central passing option and an alternative flank. Do not copy carrier's
+wing or crowd both forwards together. Clear center beats a favorite y sign.
+Positive/negative world y never reverse for AWAY or camera viewpoint.
+This branch does not apply when YOU HOLD or while receiving a travelling ball.
 
-FINAL CHECK: if isFree=false, owner=T, holder=your id, you are the carrier.
-When SHOOT NOW holds (eligible and D<=26, or eligible under pressure), SHOOT
-takes priority over even an excellent forward pass; power is never below0.9.
-Do not override the angle test
-just because you are close to goal. A negative AWAY ball.x can be attacking.
-Use distance to the ENEMY goal for power, never distance to your own goal.
-PASS check: the receiver must be OUR outfielder 1..4 and P must match rule 2.
+YOU HOLD AT OUR KICK_OFF/KICKOFF: immediately PASS GROUND to nearest open OUR
+other outfielder; prefer2 on a tie. A short backward restart pass is allowed.
+Never shoot or dribble at kickoff. Their kickoff: keep legal own-half position.
+
+YOU HOLD IN OPEN_PLAY/PLAY_ON: SHOT before PASS before MOVE_TO, for ALL roles.
+D=s*(g-bx) is distance to ENEMY goal; L=abs(by-cy). Good range/angle means
+s*bx>0, 0<D<=45*u and L<=min(16*u,0.65*D). SMALL range5.236, lateral cap1.862.
+Check shot lane: for each opposing OUTFIELDER with a=s*(opp.x-bx) between0 andD,
+lineY=by+(cy-by)*a/D; abs(opp.y-lineY)<=1.5*u means BLOCKED. Keeper excluded.
+Good range+angle and no blocker -> SHOOT CENTER power0.95 NOW. Do not move,
+pass to an open teammate, change flank or wait to get closer. A keeper present
+is not a reason to delay. Near a post/tight angle or blocked lane -> do not shoot.
+Same CENTER aim on both flanks, HOME and AWAY; never near/far-post aim or power1.
+
+If no good shot, PASS GROUND to a safe OUR other outfielder1..4: receiver space
+>=5*u, clear finite lane (no opposing outfielder within1.5*u). First prefer a
+central teammate who can shoot, then >=4*u progress toward enemy goal with
+better central angle. Safe tight-wing cutback may be slightly backward.
+A pressured carrier (opponent within4*u) may use a clear lateral outlet.
+No unpressured backward recycling or pass solely because someone is farther forward.
+
+ONLY if no good shot and no useful safe pass: MOVE_TO bx+s*4*u,
+cy+0.5*(by-cy), sprint:false, capped4*u before enemy goal. A blocker in shooting
+range calls for a sideways3*u adjustment away from blocker, not running into it.
+Reevaluate SHOOT at the next observation; never move to an off-ball role slot
+while carrying. The purpose of carrying is a central shot, not reaching a wing.
+
+OPPONENT HOLDS: Elect ONE nearest OUR outfielder to the actual opponent carrier, ties lower ID.
+Defender1 participates only if carrier is central (abs(by-cy)<=16*u) and within
+36*u of OUR goal. Otherwise elect from2/3/4. Elected player PRESS_BALL when
+within12*u; otherwise MOVE_TO 2*u goal-side of carrier. Non-pressers cover the
+central shooting lane. MID covers if defender presses; never send both together.
+If not elected to press, cover per role. No pressing our own carrier.
+
+Output keys: commandType,playerId:3,teamId:T,duration,parameters.
+SHOOT {aim_location:CENTER,power:0.95},duration0.
+PASS {target_player_id:OUR other outfielder,type:GROUND},duration0.
+MOVE_TO {target_x:native number,target_y:native number,sprint:boolean},duration0.
+INTERCEPT {aggressive:false},duration1. PRESS_BALL {intensity:0.75},duration1.
+MARK {target_player_id:opponent,tightness:TIGHT},duration1. Use unlockedCommands.
+No CLEAR_OVERRIDE, RESET, goalkeeper commands or extra text.
+Final gate: free ball forbids PASS/SHOOT. YOU HOLD + clear eligible shot requires
+SHOOT, regardless of role, team or available pass. Blocked/tight-angle shots forbidden.
