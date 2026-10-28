@@ -1,0 +1,75 @@
+{
+  "region": "us-east-1",
+  "outfield": {
+    "model": {
+      "bedrockModelConfig": {
+        "modelId": "global.anthropic.claude-sonnet-4-6",
+        "maxTokens": 2048,
+        "apiFormat": "converse_stream",
+        "additionalParams": {
+          "outputConfig": {
+            "textFormat": {
+              "type": "json_schema",
+              "structure": {
+                "jsonSchema": {
+                  "name": "football_command_array",
+                  "schema": "{\"type\":\"array\",\"minItems\":1,\"items\":{\"anyOf\":[{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"SHOOT\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"aim_location\":{\"type\":\"string\",\"enum\":[\"BL\",\"BR\",\"CENTER\"]},\"power\":{\"type\":\"number\",\"enum\":[0.72,0.78]}},\"required\":[\"aim_location\",\"power\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"PASS\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"target_player_id\":{\"type\":\"integer\",\"enum\":[0,1,2,3,4]},\"type\":{\"type\":\"string\",\"enum\":[\"GROUND\"]}},\"required\":[\"target_player_id\",\"type\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"MOVE_TO\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"target_x\":{\"type\":\"number\"},\"target_y\":{\"type\":\"number\"},\"sprint\":{\"type\":\"boolean\"}},\"required\":[\"target_x\",\"target_y\",\"sprint\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"PRESS_BALL\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"intensity\":{\"type\":\"number\",\"enum\":[0.4,0.75]}},\"required\":[\"intensity\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"INTERCEPT\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"aggressive\":{\"type\":\"boolean\",\"enum\":[false]}},\"required\":[\"aggressive\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"MARK\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"target_player_id\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"tightness\":{\"type\":\"string\",\"enum\":[\"TIGHT\",\"LOOSE\"]}},\"required\":[\"target_player_id\",\"tightness\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false}]}}"
+                }
+              }
+            }
+          },
+          "additionalModelRequestFields": {
+            "thinking": {
+              "type": "adaptive"
+            },
+            "output_config": {
+              "effort": "low"
+            }
+          }
+        }
+      }
+    },
+    "allowedTools": [],
+    "maxIterations": 1,
+    "memory": {
+      "disabled": {}
+    }
+  },
+  "playerOverrides": {
+    "Lothar_Matthaus": {
+      "model": {
+        "bedrockModelConfig": {
+          "modelId": "global.anthropic.claude-sonnet-4-6",
+          "maxTokens": 512,
+          "apiFormat": "converse_stream",
+          "additionalParams": {
+            "outputConfig": {
+              "textFormat": {
+                "type": "json_schema",
+                "structure": {
+                  "jsonSchema": {
+                    "name": "football_command_array",
+                    "schema": "{\"type\":\"array\",\"minItems\":1,\"items\":{\"anyOf\":[{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"SHOOT\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"aim_location\":{\"type\":\"string\",\"enum\":[\"BL\",\"BR\",\"CENTER\"]},\"power\":{\"type\":\"number\",\"enum\":[0.72,0.78]}},\"required\":[\"aim_location\",\"power\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"PASS\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"target_player_id\":{\"type\":\"integer\",\"enum\":[0,1,2,3,4]},\"type\":{\"type\":\"string\",\"enum\":[\"GROUND\"]}},\"required\":[\"target_player_id\",\"type\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"MOVE_TO\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"target_x\":{\"type\":\"number\"},\"target_y\":{\"type\":\"number\"},\"sprint\":{\"type\":\"boolean\"}},\"required\":[\"target_x\",\"target_y\",\"sprint\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"PRESS_BALL\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"intensity\":{\"type\":\"number\",\"enum\":[0.4,0.75]}},\"required\":[\"intensity\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"INTERCEPT\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"aggressive\":{\"type\":\"boolean\",\"enum\":[false]}},\"required\":[\"aggressive\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false},{\"type\":\"object\",\"properties\":{\"commandType\":{\"type\":\"string\",\"enum\":[\"MARK\"]},\"playerId\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"teamId\":{\"type\":\"integer\",\"enum\":[0,1]},\"duration\":{\"type\":\"integer\",\"enum\":[0,1]},\"parameters\":{\"type\":\"object\",\"properties\":{\"target_player_id\":{\"type\":\"integer\",\"enum\":[1,2,3,4]},\"tightness\":{\"type\":\"string\",\"enum\":[\"TIGHT\",\"LOOSE\"]}},\"required\":[\"target_player_id\",\"tightness\"],\"additionalProperties\":false}},\"required\":[\"commandType\",\"playerId\",\"teamId\",\"parameters\",\"duration\"],\"additionalProperties\":false}]}}"
+                  }
+                }
+              }
+            },
+            "additionalModelRequestFields": {
+              "thinking": {
+                "type": "disabled"
+              }
+            }
+          }
+        }
+      },
+      "truncation": {
+        "strategy": "sliding_window",
+        "config": {
+          "slidingWindow": {
+            "messagesCount": 1
+          }
+        }
+      }
+    }
+  }
+}

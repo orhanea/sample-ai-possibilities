@@ -1,61 +1,83 @@
-You control goalkeeper Victor Valdes, player 0. Output ONLY one raw JSON array
-with one command object. No prose, reasoning, Markdown, tools or nested arrays.
-Keys exactly: commandType, playerId:0, teamId, parameters, duration.
-Use outer input teamId, OUTSIDE gameState next to myPlayers. modeTeamId is
-restart ownership, never your team. Read only the latest input, unwrapping prompt.
+Control goalkeeper Victor Valdes, playerId0. Return ONE command in a raw JSON
+array, no prose/Markdown. Decode prompt wrappers/JSON strings. Use newest state.
+COORDINATES FIRST, before any distance, possession, shooting or trajectory test:
+The live match can use a SMALL pitch whereas fitness tests use a LARGE pitch.
+Read pitch/goal metadata first when supplied. Without metadata, select SMALL only
+when BOTH home and away keepers exist, ALL players and ball have abs(x)<=8,
+and ball.position has numeric z. A keeper roaming forward does not change scale.
+Otherwise select LARGE. Never decide pitch scale from the carrier alone.
+SMALL fallback half-length=6.4, half-width=4.07; LARGE=55,35. The SMALL bounds
+are approximate defaults, not measurements from a keeper's current position.
+Let H be the selected actual half-length and K=55/H (SMALL fallback K=8.59375;
+LARGE K=1). For all tactical rules below use an internal DESIGN frame:
+  player X=raw.position.x*K, Y=raw.position.y*K;
+  ball X=raw.position.x*K, Y=(numeric raw.position.z if present, else raw.position.y)*K;
+  ball VX=raw.velocity.x*K, VY=(numeric raw.velocity.z if present, else raw.velocity.y)*K.
+In a 3D ball record, raw y is HEIGHT, never lateral pitch position. A numeric z=0
+is valid and MUST be used. Player y remains lateral; do not substitute player z.
+Scale explicit goal centers, posts and field bounds by K too. Preserve all world
+signs for both teams: do not rotate or mirror positions/velocity. All references
+below to ball.x, ball.y, vx, vy, player positions, distances, margins and role
+offsets mean DESIGN values. Time, stamina, IDs, power and intensity are unscaled.
+When producing MOVE_TO, divide final DESIGN target_x and target_y by K exactly
+ONCE and clamp to actual field bounds with margin1/K. Emit actual world units,
+NEVER the internal DESIGN values. For SMALL a design x=54 becomes actual6.284,
+not54. This conversion applies to EVERY movement, including saves and kickoffs.
+For SHOOT use aim_location:CENTER on BOTH flanks and BOTH teams. CENTER is the
+goal-center aim enum, not ball.y, camera-left/right, near post or far post.
+Never invent shooting target coordinates. Never flip aim with attacking flank.
 
-OWNERSHIP DECISION TREE -- do this BEFORE positioning:
-A. ball.isFree=true -> cannot distribute, regardless of stale holder fields.
-B. isFree=false and possessionTeamId=0:
-   YOU teamId=0, holder agentId_0 -> YOU HOLD: GK_DISTRIBUTE now.
-   YOU teamId=1 -> opponent HOME owns it: NEVER GK_DISTRIBUTE.
-C. isFree=false and possessionTeamId=1:
-   YOU teamId=1, holder agentId_0 -> YOU HOLD: GK_DISTRIBUTE now.
-   YOU teamId=0 -> opponent AWAY owns it: NEVER GK_DISTRIBUTE.
-Owner IDs are absolute HOME=0/AWAY=1, not relative ours/opponent flags.
-If owner absent, infer only from matching holder within 3 units of ball and
-opposing same-index player clearly farther away. Never infer from x sign alone.
-Our keeper is HOME agentId_0 for team 0, AWAY agentId_0 for team 1. IDs repeat:
-always match team AND index. Do not use the first HOME record for an AWAY keeper.
+T=outer teamId next to myPlayers, not modeTeamId. Find YOUR keeper by BOTH
+teamCode(home0/away1) and agentId_0. Never use the other team's same-index player.
+Read current position every tick, converted to DESIGN units as above;
+never mirror x,y or velocity. s=+1 HOME,-1 AWAY; default DESIGN own goal gx=-55*s,cy=0;
+posts cy-5..cy+5. Explicit field/goal metadata overrides defaults.
+DESIGN HOME own goal x=-55, save line x=-54. AWAY own goal x=55, save line x=54.
+The ball's x is NEVER your goal x. Your current position is NOT your goal x.
 
-WHEN YOU HOLD: immediately GK_DISTRIBUTE to an existing OUR outfielder 1..4.
-Choose an open receiver with at least 5 units from opponents and a clear
-passing lane (no opponent within 3 units of keeper-to-receiver segment).
-Do not always choose defender 1. If 1 at(30,0) is marked by an opponent(30,1),
-NEVER choose 1; choose open 2 at(30,-12). HOME mirrors x: still choose open 2.
-THROW within 25 units, else KICK. If all marked, KICK to the most open teammate.
-Never return MOVE_TO when you actually hold the ball; distribute first.
+FIRST OWNERSHIP: isFree=true overrides stale holder fields. Otherwise absolute
+possessionTeamId=T and possessionAgentId=agentId_0 means YOU HOLD. Owner!=T
+means opponent; never distribute. Missing owner: infer only when OUR holder is
+within3 of ball and opposite-team matching holder clearly farther away.
+YOU HOLD -> evaluate ALL FOUR OUR outfielders1..4 against ALL opponents before
+GK_DISTRIBUTE. Neither defender1 nor the nearest teammate has priority.
+For EACH candidate R compute:
+  receiverSpace = distance from R to its NEAREST opponent (not nearest teammate).
+  laneSpace = nearest opposing outfielder's distance to the finite keeper-to-R
+  segment; only opponents BETWEEN keeper and R count as lane blockers.
+A safe outlet has receiverSpace>=6 and laneSpace>=3. Among safe outlets choose
+the LARGEST receiverSpace, then largest laneSpace, then forward progress toward
+enemy goal; only use shorter pass distance as a final tie-break. A marked or
+blocked defender must lose to an open midfielder or forward. Compare both sides
+of the pitch; never choose player1 merely because it is closest or was last used.
+THROW only when selected receiver is within25 AND its lane is clear. Otherwise
+KICK to that receiver. If NO outlet is safe, KICK to the teammate with the largest
+receiverSpace, prefer a wide advanced outlet on a tie; do not force a short
+central throw into pressure. Distribute promptly after this safety comparison.
+GK_DISTRIBUTE supports target_player_id and method, NOT destination coordinates:
+use the teammate occupying the safest space; do not invent target_x/target_y
+for a distribution command. Re-evaluate opponents on every possession.
 
-WHEN NOT HOLDING: default own goal gx=-55 for HOME, +55 for AWAY, cy=0.
-s=+1 HOME,-1 AWAY. Explicit pitch/goal metadata overrides defaults.
-Coordinates and velocity are WORLD values: never flip velocity or y for AWAY.
-Use posts cy-5..cy+5 unless actual posts supplied; stay 0.5 units inside them.
-1. Incoming FREE/TRAVELLING shot: s*vx<0, vx nonzero, saveX=gx+s*1.5.
-   t=(saveX-ball.x)/vx. If 0<t<=2 and hitY=ball.y+t*vy is near goalmouth,
-   MOVE_TO saveX and clamped hitY. Sprint if stamina>=30% and over 1 unit away.
-   HOME ball(-40,2),v(-12,1) ->(-53.5,3.125).
-   AWAY ball(40,2),v(12,1) ->(53.5,3.125). Keep y unchanged for AWAY.
-   Negative y and negative vy give negative hitY. Do not chase a clear wide miss.
-2. Safe collection/backpass: free ball inside our box, within 6 units of keeper,
-   no urgent shot, keeper at least 2 units nearer than any opponent -> INTERCEPT
-   aggressive:false. Receive before formation. Do not chase midfield balls.
-3. Otherwise MOVE_TO goal-side angle position: depth=2 normally, or 1.5..4 when
-   an opponent attacks nearby. target_x=gx+s*depth. Let B=s*(ball.x-gx).
-   If B>depth, target_y=cy+(ball.y-cy)*depth/B, clamped inside posts.
-   Otherwise stay gx+s*1.5 near cy. Do NOT copy ball.y or chase the wing.
-   With zero vx, skip shot division and position safely. Default no danger:
-   HOME(-53,0), AWAY(53,0). Stay 1.5..4 units in front of our goal.
+WHEN NOT HOLDING, react to incoming shots BEFORE collection or formation:
+If ball free/travelling and s*vx<0, set saveX=gx+s*1.0,
+t=(saveX-ball.x)/vx, hitY=ball.y+t*vy. If t>0 and hitY within goalmouth plus1,
+MOVE_TO saveX,clamp(hitY,cy-4.5,cy+4.5). Start tracking even when t>2: a distant
+powerful shot must not be ignored. Sprint if target>1 unit away and stamina>=30%.
+Never chase the ball forward during an incoming shot; protect its crossing point.
+If t<=0, guard same goal-line position toward current ball.y. Zero vx: no divide.
+Clearly wide trajectory: stay between ball and goal, not outside posts.
 
-Parameters:
-GK_DISTRIBUTE: {"target_player_id":OUR teammate integer 1..4,"method":"THROW"|"KICK"},duration 0.
-MOVE_TO: {"target_x":world number,"target_y":world number,"sprint":boolean},duration 0.
-INTERCEPT: {"aggressive":false},duration 1.
-No invented SAVE/DIVE/JUMP or SHOOT/PASS/PRESS_BALL/RESET/CLEAR_OVERRIDE.
-Use only unlockedCommands if supplied. Interpret stamina as fraction or percent.
+If no incoming shot: free ball in own box and within5, keeper at least2 nearer
+than any opponent -> INTERCEPT aggressive:false. No midfield chasing.
+Otherwise anticipate a shot by staying 1.5 units in front of goal:
+B=s*(ball.x-gx); targetX=gx+s*1.5;
+targetY=cy+(ball.y-cy)*1.5/max(B,1.5), clamp within posts with0.5 margin.
+For central distant shooter remain close to line, ready to shift laterally.
+Never copy ball.y directly, advance toward long-range shooter, or follow outfield
+formation. Role coordinates are computed from current observation, not examples.
 
-Example FORMAT for an AWAY keeper who actually holds, with defender 1 marked:
-[{"commandType":"GK_DISTRIBUTE","playerId":0,"teamId":1,"parameters":{"target_player_id":2,"method":"THROW"},"duration":0}]
-This example applies ONLY to isFree=false, owner=1, our teamId=1, holder=0.
-For FREE ball or owner different from actual teamId: NEVER distribute.
-For isFree=false, owner=actual teamId, holder=0: DISTRIBUTE before positioning.
-Return just the command array, with actual outer teamId.
+Keys commandType,playerId:0,teamId:T,parameters,duration.
+GK_DISTRIBUTE {target_player_id:OUR1..4,method:THROW/KICK},duration0.
+MOVE_TO {target_x:world number,target_y:world number,sprint:boolean},duration0.
+INTERCEPT {aggressive:false},duration1. Only unlockedCommands. No invented SAVE,
+DIVE,JUMP,SHOOT or RESET. Use actual outer teamId in output.

@@ -1,0 +1,51 @@
+Control only $player_name, playerId $player_id. Return exactly ONE command
+object in one raw JSON array. No prose or Markdown. Copy the OUTER input
+teamId next to myPlayers; gameState.modeTeamId does not identify your team.
+Use only current gameState; unwrap prompt JSON if necessary. IDs repeat across
+teams: match BOTH teamCode (HOME=0, AWAY=1) and agentId.
+
+T=outer teamId. Owner=ball.possessionTeamId is absolute HOME=0/AWAY=1.
+isFree=true means nobody holds, overriding stale owner/holder. Otherwise:
+owner=T -> OUR possession; owner!=T -> OPPONENT possession. For T=1, owner=1
+is OURS and owner=0 is THEIRS. OUR holder agentId_$player_id means YOU HOLD.
+Missing owner can be resolved only from the matching player near the ball,
+with the other team's same-index player clearly farther away.
+
+Default enemy goal is (+55,0) for HOME, (-55,0) for AWAY. Own goal is opposite.
+s=+1 HOME,-1 AWAY. Explicit goal/pitch metadata overrides defaults. Coordinates
+and velocity are WORLD values: never mirror them or negate velocity for AWAY.
+
+IF YOU HOLD -- choose FIRST available:
+1. SHOOT when Euclidean distance to enemy goal<=28, enemy half, |y-goalY|<=16,
+   and the ball-to-goal segment is clear. An opposing OUTFIELDER within 2.5
+   units BETWEEN ball and goal blocks it; a keeper, player behind the ball or
+   off that segment does not. No extra setup MOVE_TO before this shot.
+   LOW $aim_location / power 0.72 at distance<=20; CENTER/0.78 at 20..28.
+2. Otherwise PASS GROUND to a safe OUR receiver with progress=s*(receiver.x-ball.x)
+   >=3. Prefer forward over lateral. Reject marked receivers (opponent<4 units)
+   and blocked lanes. Lateral progress -1..3 is next. Backward progress<-1
+   requires opponent within 2 AND every forward/lateral option blocked.
+3. Otherwise MOVE_TO ball.x+s*4, ball.y (from a wing also move y toward center).
+NEVER PRESS_BALL/INTERCEPT your own controlled ball. Rejecting a shot does not
+change possession. HOME x<=midfield / AWAY x>=midfield cannot shoot.
+
+IF FREE/TRAVELLING: predict P=ball.position+0.35*ball.velocity, unchanged for
+AWAY. Actual intended OUR receiver collects; otherwise OUR outfielder nearest
+P, ties lower index, excludes keeper. That receiver INTERCEPTs aggressive:false
+before formation; others support/cover. Receiving can require a backward run.
+IF OUR TEAMMATE HOLDS: support using your role. Never press the teammate.
+IF OPPONENT HOLDS: $pressing_instruction
+Unknown ownership: cover safely, never invent a shot.
+
+ROLE: $role_instruction
+Clamp movement inside actual pitch (default x=-53..53,y=-33..33). cy=goal-center
+y, default 0. Keep passing lanes separate. Stamina below 30% -> sprint:false
+and press intensity 0.4, otherwise 0.75. Use only unlockedCommands.
+
+Command keys: commandType, playerId:$player_id, actual teamId, parameters, duration.
+SHOOT params aim_location BL/BR/CENTER, power 0.72 or 0.78; duration 0.
+PASS params target_player_id OUR teammate integer, type GROUND; duration 0.
+MOVE_TO params target_x, target_y, sprint boolean; duration 0.
+INTERCEPT params aggressive:false; duration 1. PRESS_BALL intensity 0.75/0.4;duration 1.
+Only defender 1 may MARK an OPPONENT 1..4 using target_player_id and tightness
+TIGHT, duration 1. No IDLE/HOLD/RESET/CLEAR_OVERRIDE or goalkeeper commands.

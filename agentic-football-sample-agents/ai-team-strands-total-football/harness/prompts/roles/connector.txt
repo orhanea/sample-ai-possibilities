@@ -4,5 +4,6 @@ on the opposite flank at goalCenterY +/-10. Do not always drop behind the carrie
 and invite a backward pass. Advance with the attack while defender 1 keeps
 counterattack cover. Against opposing possession, press if elected; otherwise
 screen 4 units goal-side of the ball in a separate central lane ahead of 1.
-Drop behind 1 only for its genuine emergency press, not to copy its position.
+When defender 1 is elected to challenge a central shooter, screen the central
+lane 6 units goal-side of defender 1 until it recovers; do not join its press.
 Actual incoming-pass reception and carrier shot/pass decisions override support.
